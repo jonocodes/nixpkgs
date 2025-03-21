@@ -15,29 +15,25 @@
   systemd,
 }:
 let
-
-  throwSystem = throw "Unsupported system: ${stdenv.hostPlatform.system}";
-
-  _version = "6.0.21";
-
   baseUrl = "https://d2atcrkye2ik4e.cloudfront.net/download";
-
-  srcs = {
-    x86_64-linux = fetchurl {
-      url = "${baseUrl}/linux/linux_deb_x64/ticktick-${_version}-amd64.deb";
-      hash = "sha256-e5N20FL2c6XdkDax0SMGigLuatXKZxb9c53sqQ5XVtM=";
-    };
-    aarch64-linux = fetchurl {
-      url = "${baseUrl}/linux/linux_deb_arm64/ticktick-${_version}-arm64.deb";
-      hash = "sha256-6/nzPL+TeEE31S0ngmsUFPZEfWtt4PVAEkMqSa8OpYI=";
-    };
-  };
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "ticktick";
-  version = _version;
+  version = "6.0.21";
 
-  src = srcs.${stdenv.hostPlatform.system} or throwSystem;
+  src =
+    if stdenv.hostPlatform.system == "x86_64-linux" then
+      fetchurl {
+        url = "${baseUrl}/linux/linux_deb_x64/ticktick-${finalAttrs.version}-amd64.deb";
+        hash = "sha256-e5N20FL2c6XdkDax0SMGigLuatXKZxb9c53sqQ5XVtM=";
+      }
+    else if stdenv.hostPlatform.system == "aarch64-linux" then
+      fetchurl {
+        url = "${baseUrl}/linux/linux_deb_arm64/ticktick-${finalAttrs.version}-arm64.deb";
+        hash = "sha256-6/nzPL+TeEE31S0ngmsUFPZEfWtt4PVAEkMqSa8OpYI=";
+      }
+    else
+      throw "Unsupported system: ${stdenv.hostPlatform.system}";
 
   nativeBuildInputs = [
     wrapGAppsHook3
@@ -89,7 +85,10 @@ stdenv.mkDerivation (finalAttrs: {
       hbjydev
       jonocodes
     ];
-    platforms = builtins.attrNames srcs;
+    platforms = [
+      "x86_64-linux"
+      "aarch64-linux"
+    ];
     sourceProvenance = with sourceTypes; [ binaryNativeCode ];
   };
 })
