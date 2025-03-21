@@ -21,7 +21,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   src = if stdenv.hostPlatform.system == "x86_64-linux" then
     fetchurl {
-      url = "${finalAttrs.baseUrl}/linux/linux_deb_x64/ticktick-${finalAttrs.version}-amd64.tar.gz";
+      url = "${finalAttrs.baseUrl}/linux/linux_deb_x64/ticktick-${finalAttrs.version}-amd64.deb";
       hash = "sha256-e5N20FL2c6XdkDax0SMGigLuatXKZxb9c53sqQ5XVtM=";
     }
   else if stdenv.hostPlatform.system == "aarch64-linux" then
