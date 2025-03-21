@@ -1,19 +1,5 @@
-{
-  lib,
-  fetchurl,
-  stdenv,
-  wrapGAppsHook3,
-  dpkg,
-  autoPatchelfHook,
-  glibc,
-  gcc-unwrapped,
-  nss,
-  libdrm,
-  libgbm,
-  alsa-lib,
-  xdg-utils,
-  systemd,
-}:
+{ lib, fetchurl, stdenv, wrapGAppsHook3, dpkg, autoPatchelfHook, glibc
+, gcc-unwrapped, nss, libdrm, libgbm, alsa-lib, xdg-utils, systemd, }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "ticktick";
   version = "6.0.21";
@@ -21,37 +7,25 @@ stdenv.mkDerivation (finalAttrs: {
 
   src = if stdenv.hostPlatform.system == "x86_64-linux" then
     fetchurl {
-      url = "${finalAttrs.baseUrl}/linux/linux_deb_x64/ticktick-${finalAttrs.version}-amd64.deb";
+      url =
+        "${finalAttrs.baseUrl}/linux/linux_deb_x64/ticktick-${finalAttrs.version}-amd64.deb";
       hash = "sha256-e5N20FL2c6XdkDax0SMGigLuatXKZxb9c53sqQ5XVtM=";
     }
   else if stdenv.hostPlatform.system == "aarch64-linux" then
     fetchurl {
-      url = "${finalAttrs.baseUrl}/linux/linux_deb_arm64/ticktick-${finalAttrs.version}-arm64.deb";
+      url =
+        "${finalAttrs.baseUrl}/linux/linux_deb_arm64/ticktick-${finalAttrs.version}-arm64.deb";
       hash = "sha256-6/nzPL+TeEE31S0ngmsUFPZEfWtt4PVAEkMqSa8OpYI=";
     }
   else
     throw "Unsupported system: ${stdenv.hostPlatform.system}";
 
-  nativeBuildInputs = [
-    wrapGAppsHook3
-    autoPatchelfHook
-    dpkg
-  ];
+  nativeBuildInputs = [ wrapGAppsHook3 autoPatchelfHook dpkg ];
 
-  buildInputs = [
-    nss
-    glibc
-    libdrm
-    gcc-unwrapped
-    libgbm
-    alsa-lib
-    xdg-utils
-  ];
+  buildInputs = [ nss glibc libdrm gcc-unwrapped libgbm alsa-lib xdg-utils ];
 
   # Needed to make the process get past zygote_linux fork()'ing
-  runtimeDependencies = [
-    systemd
-  ];
+  runtimeDependencies = [ systemd ];
 
   unpackPhase = ''
     runHook preUnpack
@@ -77,7 +51,8 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   meta = with lib; {
-    description = "Powerful to-do & task management app with seamless cloud synchronization across all your devices";
+    description =
+      "Powerful to-do & task management app with seamless cloud synchronization across all your devices";
     homepage = "https://ticktick.com/home/";
     license = licenses.unfree;
     maintainers = with maintainers; [ hbjydev ];
