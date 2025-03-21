@@ -14,24 +14,30 @@
   xdg-utils,
   systemd,
 }:
-stdenv.mkDerivation (finalAttrs: {
-  pname = "ticktick";
-  version = "6.0.21";
+let
+
+  throwSystem = throw "Unsupported system: ${stdenv.hostPlatform.system}";
+
+  _version = "6.0.21";
+
   baseUrl = "https://d2atcrkye2ik4e.cloudfront.net/download";
 
-  src =
-    if stdenv.hostPlatform.system == "x86_64-linux" then
-      fetchurl {
-        url = "${finalAttrs.baseUrl}/linux/linux_deb_x64/ticktick-${finalAttrs.version}-amd64.deb";
-        hash = "sha256-e5N20FL2c6XdkDax0SMGigLuatXKZxb9c53sqQ5XVtM=";
-      }
-    else if stdenv.hostPlatform.system == "aarch64-linux" then
-      fetchurl {
-        url = "${finalAttrs.baseUrl}/linux/linux_deb_arm64/ticktick-${finalAttrs.version}-arm64.deb";
-        hash = "sha256-6/nzPL+TeEE31S0ngmsUFPZEfWtt4PVAEkMqSa8OpYI=";
-      }
-    else
-      throw "Unsupported system: ${stdenv.hostPlatform.system}";
+  srcs = {
+    x86_64-linux = fetchurl {
+      url = "${baseUrl}/linux/linux_deb_x64/ticktick-${_version}-amd64.deb";
+      hash = "sha256-e5N20FL2c6XdkDax0SMGigLuatXKZxb9c53sqQ5XVtM=";
+    };
+    aarch64-linux = fetchurl {
+      url = "${baseUrl}/linux/linux_deb_arm64/ticktick-${_version}-arm64.deb";
+      hash = "sha256-6/nzPL+TeEE31S0ngmsUFPZEfWtt4PVAEkMqSa8OpYI=";
+    };
+  };
+in
+stdenv.mkDerivation (finalAttrs: {
+  pname = "ticktick";
+  version = _version;
+
+  src = srcs.${stdenv.hostPlatform.system} or throwSystem;
 
   nativeBuildInputs = [
     wrapGAppsHook3
@@ -79,11 +85,11 @@ stdenv.mkDerivation (finalAttrs: {
     description = "Powerful to-do & task management app with seamless cloud synchronization across all your devices";
     homepage = "https://ticktick.com/home/";
     license = licenses.unfree;
-    maintainers = with maintainers; [ hbjydev ];
-    platforms = [
-      "x86_64-linux"
-      "aarch64-linux"
+    maintainers = with maintainers; [
+      hbjydev
+      jonocodes
     ];
+    platforms = builtins.attrNames srcs;
     sourceProvenance = with sourceTypes; [ binaryNativeCode ];
   };
 })
